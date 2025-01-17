@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] - EventPlanner</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Evenementen</h2>
+        <input type="text" placeholder="Zoeken..." />
+
+        <nav>
+            @foreach (var eventItem in ViewBag.Events)
+            {
+                <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })">@eventItem.Name</a>
+            }
+        </nav>
+
+        <button class="new-event">Nieuw Evenement</button>
+    </div>
+
+    <div class="details-container">
+        <h2>Evenement Details</h2>
+
+        @RenderBody()
+
+        <div class="tab-container">
+            <button class="active">ToDo-lijst</button>
+            <button>Shiftenlijst</button>
+            <button>Boodschappenlijst</button>
+        </div>
+    </div>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

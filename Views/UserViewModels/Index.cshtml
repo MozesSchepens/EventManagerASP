@@ -1,0 +1,63 @@
+﻿@model IEnumerable<EventManagerADV.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+    string komma = "";
+}
+
+<h1>Index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Roles)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsBlocked)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            { komma = ""; }
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserEmail)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @foreach(string role in item.Roles)
+                    {
+
+                        @komma @role
+                        {
+                            komma = ", ";
+                        }
+                    }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsBlocked)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> 
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
