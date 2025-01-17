@@ -32,7 +32,7 @@ namespace EventManagerADV.ViewModels
         {
         }
 
-        public UserViewModel(Users user, ApplicationDbContext context)
+        public UserViewModel(ApplicationUser user, ApplicationDbContext context)
         {
             UserId = user.Id;
             UserName = user.UserName;

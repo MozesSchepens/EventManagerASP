@@ -10,9 +10,9 @@ namespace EventManagerADV.APIControllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly SignInManager<Users> _signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountsController(SignInManager<Users> signInManager) 
+        public AccountsController(SignInManager<ApplicationUser> signInManager) 
         { 
             _signInManager = signInManager;
         }

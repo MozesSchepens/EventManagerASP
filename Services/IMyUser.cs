@@ -1,34 +1,30 @@
 ﻿using EventManagerADV.Data;
 using EventManagerADV.Models;
 
-namespace EventManagerADV.Services
+public interface IMyUser
 {
-    public interface IMyUser
+    public ApplicationUser User { get; }
+}
+
+public class MyUser : IMyUser
+{
+    private readonly ApplicationDbContext _context;
+    private readonly IHttpContextAccessor _httpContext;
+
+    public ApplicationUser User => GetUser();
+
+    public MyUser(ApplicationDbContext context, IHttpContextAccessor httpContext)
     {
-        public Users User { get; }
+        _context = context;
+        _httpContext = httpContext;
     }
 
-    public class MyUser : IMyUser
+    public ApplicationUser GetUser()
     {
-        ApplicationDbContext _context;
-        IHttpContextAccessor _httpContext;
-
-        public Users User { get { return GetUser(); } }
-
-
-        public MyUser(ApplicationDbContext context, IHttpContextAccessor httpContext)
-        {
-            _context = context;
-            _httpContext = httpContext;
-        }
-
-        public Users GetUser()
-        {
-            string name = _httpContext.HttpContext.User.Identity.Name;
-            if (name == null || name == "")
-                return Globals.DefaultUser;
-            else
-                return _context.Users.FirstOrDefault(u => u.UserName == name);
-        }
+        string name = _httpContext.HttpContext.User.Identity.Name;
+        if (string.IsNullOrEmpty(name))
+            return null;
+        else
+            return _context.Users.FirstOrDefault(u => u.UserName == name);
     }
 }

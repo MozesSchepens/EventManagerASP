@@ -35,7 +35,7 @@ namespace EventManagerADV.Models
         [ForeignKey("Users")]
         public string StartedById { get; set; } = "?";
 
-        public Users? StartedByUser { get; set; }
+        public ApplicationUser? StartedByUser { get; set; }
 
         public DateTime Deleted { get; set; } = DateTime.MaxValue;
     }

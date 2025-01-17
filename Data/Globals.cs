@@ -4,7 +4,7 @@ namespace EventManagerADV.Data
 {
     public static class Globals
     {
-        public static Users DefaultUser;
+        public static ApplicationUser DefaultUser { get; set; }
 
         public static WebApplication App;
     }

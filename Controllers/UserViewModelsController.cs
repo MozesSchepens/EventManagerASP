@@ -24,7 +24,7 @@ namespace EventManagerADV.Controllers
         // GET: UserViewModels
         public async Task<IActionResult> Index()
         {
-            List<UserViewModel> users = await (from Users user in _context.Users
+            List<UserViewModel> users = await (from ApplicationUser user in _context.Users
                                                select new UserViewModel(user, _context))
                                        .ToListAsync();
             
@@ -66,7 +66,7 @@ namespace EventManagerADV.Controllers
                 try
                 {
                     // wijzig usergegevens
-                    Users user = await _context.Users.FindAsync(model.UserId);
+                    ApplicationUser user = await _context.Users.FindAsync(model.UserId);
                     user.Email = model.UserEmail;
                     user.LockoutEnd = model.IsBlocked ? DateTime.MaxValue : DateTime.Now;
                     _context.Update(user);
