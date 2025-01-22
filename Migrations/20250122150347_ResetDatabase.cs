@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventManagerASP.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class ResetDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -210,22 +210,41 @@ namespace EventManagerASP.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: false),
-                    OrgId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DoneById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    OrgId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     BoDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DoneById = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Deleted = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    OrganisatorUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Organisator", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Organisator_AspNetUsers_OrganisatorUserId",
-                        column: x => x.OrganisatorUserId,
+                        name: "FK_Organisator_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Organisator_AspNetUsers_DoneById",
+                        column: x => x.DoneById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Organisator_AspNetUsers_OrgId",
+                        column: x => x.OrgId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Organisator_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Organisator_Events_EventId",
                         column: x => x.EventId,
@@ -284,14 +303,29 @@ namespace EventManagerASP.Migrations
                 column: "StartedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Organisator_ApplicationUserId",
+                table: "Organisator",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Organisator_DoneById",
+                table: "Organisator",
+                column: "DoneById");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Organisator_EventId",
                 table: "Organisator",
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Organisator_OrganisatorUserId",
+                name: "IX_Organisator_OrgId",
                 table: "Organisator",
-                column: "OrganisatorUserId");
+                column: "OrgId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Organisator_UserId",
+                table: "Organisator",
+                column: "UserId");
         }
 
         /// <inheritdoc />

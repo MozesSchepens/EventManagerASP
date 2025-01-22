@@ -1,50 +1,44 @@
 ﻿@model EventManagerASP.Models.Event
-@using Microsoft.AspNetCore.Mvc.Localization
-@using Microsoft.Extensions.Localization
-
-@inject IViewLocalizer _localizer
-@inject IStringLocalizer<SharedResource> _shared
 
 @{
-    ViewData["Title"] = _shared["Edit"];
+    ViewData["Title"] = "Edit Event";
 }
 
-<h1>@_shared["Edit"]</h1>
+<h1>Edit Event</h1>
 
-<h4>@_localizer["Event"]</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="StartedById" />            @* we send the Id of the owner back without the possibility to edit this *@
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value=@_shared["Save"] class="btn btn-primary" />
-            </div>
-        </form>
+<form asp-action="Edit" data-ajax="true" data-ajax-method="POST" data-ajax-update="#result">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-</div>
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="StartDate" class="control-label"></label>
+        <input asp-for="StartDate" class="form-control" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="EndDate" class="control-label"></label>
+        <input asp-for="EndDate" class="form-control" />
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CategoryId" class="control-label"></label>
+        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+    </div>
+</form>
 
-<div>
-    <a asp-action="Index">@_shared["Back To List"]</a>
-</div>
+<div id="result"></div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }

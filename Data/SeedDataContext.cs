@@ -1,6 +1,7 @@
 ﻿using EventManagerASP.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,69 +10,75 @@ namespace EventManagerASP.Data
 {
     public class SeedDataContext
     {
-        public static async Task Initialize(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task Initialize(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<SeedDataContext> logger)
         {
             context.Database.EnsureCreated();
             await context.Database.MigrateAsync();
 
+            // ✅ Zorg ervoor dat de rollen bestaan voordat gebruikers worden aangemaakt
             string[] roleNames = { "User", "UserAdmin", "SystemAdmin" };
 
             foreach (var roleName in roleNames)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))
                 {
+                    logger.LogInformation($"Creating role: {roleName}");
                     await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
 
-            if (!await userManager.Users.AnyAsync())  // FIXED: Correct user list reference
+            if (!await userManager.Users.AnyAsync(u => u.Email == "admin@example.com"))
             {
-                var testUser = new ApplicationUser { UserName = "TestUser", FirstName = "Test", LastName = "User", Email = "test@example.com", EmailConfirmed = true };
-                var adminUser = new ApplicationUser { UserName = "SystemAdmin", FirstName = "System", LastName = "Admin", Email = "admin@example.com", EmailConfirmed = true };
+                logger.LogInformation("Seeding admin user...");
 
-                await userManager.CreateAsync(testUser, "Xxx!12345");
-                await userManager.CreateAsync(adminUser, "Xxx!12345");
-
-                await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
-                await userManager.AddToRoleAsync(testUser, "UserAdmin");
-            }
-
-            await context.SaveChangesAsync();
-
-            if (!context.Categories.Any())
-            {
-                var categories = new List<Category>
+                var adminUser = new ApplicationUser
                 {
-                    new Category { Name = "Feest" },
-                    new Category { Name = "Eten" },
-                    new Category { Name = "Kerst" },
-                    new Category { Name = "Kermis" },
-                    new Category { Name = "Festival" },
-                    new Category { Name = "Verjaardag" }
+                    UserName = "SystemAdmin",
+                    FirstName = "Admin",
+                    LastName = "User",
+                    Email = "admin@example.com",
+                    EmailConfirmed = true
                 };
 
-                context.Categories.AddRange(categories);
-                await context.SaveChangesAsync();
+                var result = await userManager.CreateAsync(adminUser, "Admin!12345");
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        logger.LogError($"Error creating admin user: {error.Description}");
+                    }
+                }
             }
 
             if (!context.Events.Any())
             {
-                var defaultUser = await userManager.FindByNameAsync("SystemAdmin");
+                logger.LogInformation("Seeding events...");
+
+                var categories = await context.Categories.ToListAsync();
+                var feestCategory = categories.FirstOrDefault(c => c.Name == "Feest")?.Id ?? 1;
+                var etenCategory = categories.FirstOrDefault(c => c.Name == "Eten")?.Id ?? 2;
+                var kerstCategory = categories.FirstOrDefault(c => c.Name == "Kerst")?.Id ?? 3;
+                var festivalCategory = categories.FirstOrDefault(c => c.Name == "Festival")?.Id ?? 4;
+
+                var defaultUser = await userManager.FindByEmailAsync("admin@example.com");
 
                 List<Event> events = new List<Event>
                 {
-                    new Event { Name = "Drank of je Leven", Description = "Gezellige avond met drank", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 1, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Spelletjes avond", Description = "Een avond vol bordspellen", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 1, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Eureka BBQ", Description = "Heerlijke barbecue met vrienden", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 2, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Kerstfeest Fantomas", Description = "Kerstfeest met cadeaus en eten", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 3, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Stoempkermis", Description = "Traditionele Belgische kermis", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 4, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Koerrock", Description = "Festival met live muziek", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 5, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Verjaardag Casi", Description = "Verjaardagsfeest voor Casi", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = 6, StartedById = defaultUser?.Id ?? string.Empty }
+                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", CategoryId = etenCategory, StartedById = defaultUser?.Id ?? string.Empty },
+                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", CategoryId = kerstCategory, StartedById = defaultUser?.Id ?? string.Empty },
+                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", CategoryId = festivalCategory, StartedById = defaultUser?.Id ?? string.Empty }
                 };
 
                 context.Events.AddRange(events);
                 await context.SaveChangesAsync();
             }
+
+            logger.LogInformation("Seeding completed.");
         }
     }
 }

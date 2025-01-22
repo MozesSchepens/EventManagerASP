@@ -10,26 +10,27 @@ namespace EventManagerASP.Models
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Event")]
-        public int EventId { get; set; }
+        public string UserId { get; set; }
+        [ForeignKey("UserId")]
+        public ApplicationUser OrganisatorUser { get; set; }
 
         [Required]
-        [ForeignKey("ApplicationUser")]
-        public string OrgId { get; set; } = string.Empty;
+        public int EventId { get; set; }
+        [ForeignKey("EventId")]
+        public Event Event { get; set; }
 
-        [Display(Name = "Added to Event")]
+        public string? DoneById { get; set; }
+        [ForeignKey("DoneById")]
+        public ApplicationUser? DoneBy { get; set; }
+
+        public string? OrgId { get; set; }
+        [ForeignKey("OrgId")]
+        public ApplicationUser? OrgUser { get; set; }
+
         public DateTime BoDate { get; set; } = DateTime.UtcNow;
 
-        [Display(Name = "Added by")]
-        public string? DoneById { get; set; }
+        public DateTime? Deleted { get; set; }
 
-        [Display(Name = "Remark")]
         public string? Remark { get; set; }
-
-        public DateTime? Deleted { get; set; } = DateTime.MaxValue;
-
-        // Navigatie-eigenschappen
-        public virtual Event? Event { get; set; }
-        public virtual ApplicationUser? OrganisatorUser { get; set; }
     }
 }

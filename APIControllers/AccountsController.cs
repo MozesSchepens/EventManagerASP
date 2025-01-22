@@ -12,18 +12,25 @@ namespace EventManagerASP.APIControllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountsController(SignInManager<ApplicationUser> signInManager) 
-        { 
+        public AccountsController(SignInManager<ApplicationUser> signInManager)
+        {
             _signInManager = signInManager;
         }
 
         [HttpPost]
         [Route("/api/login")]
-        public async Task<ActionResult<Boolean>> PostAccount([FromBody] LoginModel @login)
+        public async Task<ActionResult<Boolean>> PostAccount([FromBody] ApiLoginModel login)
         {
-            var result = await _signInManager.PasswordSignInAsync(login.Name, login.Password, true, lockoutOnFailure:false);
+            var result = await _signInManager.PasswordSignInAsync(login.Name, login.Password, true, lockoutOnFailure: false);
 
             return result.Succeeded;
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
 
     }

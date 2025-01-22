@@ -1,10 +1,13 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using EventManagerASP.Models;
+using EventManagerASP.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManagerASP.Areas.Identity.Pages.Account
 {
@@ -12,15 +15,21 @@ namespace EventManagerASP.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<RegisterModel> _logger;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDbContext context,
             ILogger<RegisterModel> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
+            _context = context;
             _logger = logger;
         }
 
@@ -70,7 +79,8 @@ namespace EventManagerASP.Areas.Identity.Pages.Account
                     UserName = Input.UserName,
                     Email = Input.Email,
                     FirstName = Input.FirstName,
-                    LastName = Input.LastName
+                    LastName = Input.LastName,
+                    EmailConfirmed = true // Automatisch bevestigen (optioneel)
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -79,6 +89,26 @@ namespace EventManagerASP.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    // ✅ Voeg standaardrol toe (User)
+                    if (!await _roleManager.RoleExistsAsync("User"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("User"));
+                    }
+                    await _userManager.AddToRoleAsync(user, "User");
+
+                    // ✅ Voeg gebruiker toe als organisator van alle bestaande evenementen
+                    var existingEvents = await _context.Events.ToListAsync();
+                    foreach (var ev in existingEvents)
+                    {
+                        _context.Organisator.Add(new Organisator
+                        {
+                            UserId = user.Id,
+                            EventId = ev.Id
+                        });
+                    }
+                    await _context.SaveChangesAsync();
+
+                    // ✅ Automatisch inloggen
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
                 }

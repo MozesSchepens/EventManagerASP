@@ -1,30 +1,23 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace EventManagerASP.Services
+public class MyMiddleWare
 {
-    public class MyMiddleWare
+    private readonly RequestDelegate _next;
+
+    public MyMiddleWare(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-
-        public MyMiddleWare(RequestDelegate next)
-        {
-            _next = next;
-        }
-
-        public Task Invoke(HttpContext httpContext)
-        {
-
-            return _next(httpContext);
-        }
+        _next = next;
     }
 
-    public static class MyMiddleWareExtensions
+    public async Task InvokeAsync(HttpContext context)
     {
-        public static IApplicationBuilder UseMyMiddleWare(this IApplicationBuilder builder)
+        if (context.Request.Cookies.ContainsKey("MyCookie"))
         {
-            return builder.UseMiddleware<MyMiddleWare>();
+            var cookieValue = context.Request.Cookies["MyCookie"];
+            context.Items["MyGlobalVariable"] = cookieValue;
         }
+
+        await _next(context);
     }
 }

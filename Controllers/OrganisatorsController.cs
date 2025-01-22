@@ -24,30 +24,13 @@ namespace EventManagerASP.Controllers
         public async Task<IActionResult> Index(int eventId)
         {
             var organisators = await _context.Organisator
-                                             .Where(o => o.EventId == eventId && o.Deleted > DateTime.Now)
+                                             .Where(o => o.EventId == eventId && (o.Deleted == null || o.Deleted > DateTime.UtcNow))
                                              .Include(o => o.OrganisatorUser)
                                              .Include(o => o.Event)
                                              .ToListAsync();
 
             ViewData["EventId"] = eventId;
             return View(organisators);
-        }
-
-        // GET: Organisators/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (!id.HasValue)
-                return NotFound();
-
-            var organisatorModel = await _context.Organisator
-                                                 .Include(o => o.OrganisatorUser)
-                                                 .Include(o => o.Event)
-                                                 .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (organisatorModel == null)
-                return NotFound();
-
-            return View(organisatorModel);
         }
 
         // GET: Organisators/Create
@@ -59,15 +42,15 @@ namespace EventManagerASP.Controllers
 
             var organisator = new Organisator { DoneById = currentUser.Id, EventId = eventId };
 
-            ViewData["OrgId"] = new SelectList(_context.Users.Where(u => u.UserName != "?"), "Id", "UserName");
-            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Description", eventId);
+            ViewData["OrgId"] = new SelectList(_context.Users, "Id", "UserName");
+            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Name", eventId);
             return View(organisator);
         }
 
         // POST: Organisators/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EventId,OrgId,BoDate,DoneById,Remark,Deleted")] Organisator organisator)
+        public async Task<IActionResult> Create([Bind("Id,EventId,OrgId,BoDate,DoneById,Deleted")] Organisator organisator)
         {
             if (ModelState.IsValid)
             {
@@ -76,71 +59,9 @@ namespace EventManagerASP.Controllers
                 return RedirectToAction(nameof(Index), new { eventId = organisator.EventId });
             }
 
-            ViewData["OrgId"] = new SelectList(_context.Users.Where(u => u.UserName != "?"), "Id", "UserName", organisator.OrgId);
-            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Description", organisator.EventId);
-            return View(organisator);
-        }
-
-        // GET: Organisators/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (!id.HasValue)
-                return NotFound();
-
-            var organisatorModel = await _context.Organisator.FindAsync(id);
-            if (organisatorModel == null)
-                return NotFound();
-
-            ViewData["OrgId"] = new SelectList(_context.Users, "Id", "UserName", organisatorModel.OrgId);
-            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Description", organisatorModel.EventId);
-            return View(organisatorModel);
-        }
-
-        // POST: Organisators/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EventId,OrgId,BoDate,DoneById,Remark,Deleted")] Organisator organisator)
-        {
-            if (id != organisator.Id)
-                return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(organisator);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrganisatorExists(organisator.Id))
-                        return NotFound();
-
-                    throw;
-                }
-                return RedirectToAction(nameof(Index), new { eventId = organisator.EventId });
-            }
-
             ViewData["OrgId"] = new SelectList(_context.Users, "Id", "UserName", organisator.OrgId);
-            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Description", organisator.EventId);
+            ViewData["EventId"] = new SelectList(_context.Events, "Id", "Name", organisator.EventId);
             return View(organisator);
-        }
-
-        // GET: Organisators/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (!id.HasValue)
-                return NotFound();
-
-            var organisatorModel = await _context.Organisator
-                                                 .Include(o => o.OrganisatorUser)
-                                                 .Include(o => o.Event)
-                                                 .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (organisatorModel == null)
-                return NotFound();
-
-            return View(organisatorModel);
         }
 
         // POST: Organisators/Delete/5
@@ -148,14 +69,15 @@ namespace EventManagerASP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var organisatorModel = await _context.Organisator.FindAsync(id);
-            if (organisatorModel != null)
+            var organisator = await _context.Organisator.FindAsync(id);
+            if (organisator != null)
             {
-                _context.Organisator.Remove(organisatorModel);
+                organisator.Deleted = DateTime.UtcNow; // Soft delete
+                _context.Update(organisator);
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction(nameof(Index), new { eventId = organisatorModel?.EventId });
+            return RedirectToAction(nameof(Index), new { eventId = organisator?.EventId });
         }
 
         private bool OrganisatorExists(int id)

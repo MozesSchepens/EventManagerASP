@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventManagerASP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250122105530_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250122150347_ResetDatabase")]
+    partial class ResetDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -175,6 +175,9 @@ namespace EventManagerASP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("BoDate")
                         .HasColumnType("datetime2");
 
@@ -182,26 +185,32 @@ namespace EventManagerASP.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DoneById")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("EventId")
                         .HasColumnType("int");
 
                     b.Property<string>("OrgId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganisatorUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Remark")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("DoneById");
 
                     b.HasIndex("EventId");
 
-                    b.HasIndex("OrganisatorUserId");
+                    b.HasIndex("OrgId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Organisator");
                 });
@@ -362,17 +371,37 @@ namespace EventManagerASP.Migrations
 
             modelBuilder.Entity("EventManagerASP.Models.Organisator", b =>
                 {
+                    b.HasOne("EventManagerASP.Models.ApplicationUser", null)
+                        .WithMany("Organisators")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("EventManagerASP.Models.ApplicationUser", "DoneBy")
+                        .WithMany()
+                        .HasForeignKey("DoneById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EventManagerASP.Models.Event", "Event")
                         .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EventManagerASP.Models.ApplicationUser", "OrgUser")
+                        .WithMany()
+                        .HasForeignKey("OrgId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EventManagerASP.Models.ApplicationUser", "OrganisatorUser")
                         .WithMany()
-                        .HasForeignKey("OrganisatorUserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DoneBy");
 
                     b.Navigation("Event");
+
+                    b.Navigation("OrgUser");
 
                     b.Navigation("OrganisatorUser");
                 });
@@ -426,6 +455,11 @@ namespace EventManagerASP.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EventManagerASP.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Organisators");
                 });
 
             modelBuilder.Entity("EventManagerASP.Models.Category", b =>
