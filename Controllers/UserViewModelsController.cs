@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EventManagerADV.Data;
-using EventManagerADV.ViewModels;
-using EventManagerADV.Models;
+using EventManagerASP.Data;
+using EventManagerASP.ViewModels;
+using EventManagerASP.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace EventManagerADV.Controllers
+namespace EventManagerASP.Controllers
 {
     public class UserViewModelsController : Controller
     {

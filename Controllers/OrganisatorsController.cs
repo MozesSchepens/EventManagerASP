@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using EventManagerADV.Data;
-using EventManagerADV.Models;
+using EventManagerASP.Data;
+using EventManagerASP.Models;
 
-namespace EventManagerADV.Controllers
+namespace EventManagerASP.Controllers
 {
     [Authorize]
     public class OrganisatorsController : Controller

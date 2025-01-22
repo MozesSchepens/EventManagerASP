@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using EventManagerADV.Data;
-using EventManagerADV.Models;
-using EventManagerADV.Services;
+using EventManagerASP.Data;
+using EventManagerASP.Models;
+using EventManagerASP.Services;
 
-namespace EventManagerADV.Controllers
+namespace EventManagerASP.Controllers
 {
     [Authorize(Roles = "User")]
     public class EventsController : Controller

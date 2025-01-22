@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using EventManagerADV.Data;
-using EventManagerADV.Models;
+using EventManagerASP.Data;
+using EventManagerASP.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Localization;
 
-namespace EventManagerADV.APIControllers
+namespace EventManagerASP.APIControllers
 {
     [Route("api/[controller]")]
     [ApiController]

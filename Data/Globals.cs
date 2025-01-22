@@ -1,6 +1,6 @@
-﻿using EventManagerADV.Models;
+﻿using EventManagerASP.Models;
 
-namespace EventManagerADV.Data
+namespace EventManagerASP.Data
 {
     public static class Globals
     {

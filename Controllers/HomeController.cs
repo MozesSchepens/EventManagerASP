@@ -1,8 +1,8 @@
-using EventManagerADV.Models;
+using EventManagerASP.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace EventManagerADV.Controllers
+namespace EventManagerASP.Controllers
 {
     public class HomeController : Controller
     {
@@ -15,6 +15,8 @@ namespace EventManagerADV.Controllers
 
         public IActionResult Index()
         {
+            // Initialize ViewBag.Events with a non-null value
+            ViewBag.Events = GetEvents() ?? new List<Event>(); // Replace GetEvents() with your actual method to fetch events
             return View();
         }
 
@@ -27,6 +29,17 @@ namespace EventManagerADV.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        // Example method to fetch events (replace with your actual implementation)
+        private List<Event> GetEvents()
+        {
+            // Fetch events from your data source
+            return new List<Event>
+            {
+                new Event { Id = 1, Name = "Event 1" },
+                new Event { Id = 2, Name = "Event 2" }
+            };
         }
     }
 }

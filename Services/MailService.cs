@@ -6,7 +6,7 @@
     using MimeKit.Text;
     using NETCore.MailKit.Infrastructure.Internal;
 
-    namespace EventManagerADV.Services
+    namespace EventManagerASP.Services
     {
         public class MailKitEmailSender : IEmailSender
         {

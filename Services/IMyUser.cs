@@ -1,5 +1,7 @@
-﻿using EventManagerADV.Data;
-using EventManagerADV.Models;
+﻿using EventManagerASP.Data;
+using EventManagerASP.Models;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 public interface IMyUser
 {
@@ -21,10 +23,13 @@ public class MyUser : IMyUser
 
     public ApplicationUser GetUser()
     {
-        string name = _httpContext.HttpContext.User.Identity.Name;
-        if (string.IsNullOrEmpty(name))
+        var httpContext = _httpContext.HttpContext;
+        if (httpContext == null || httpContext.User == null || httpContext.User.Identity == null || string.IsNullOrEmpty(httpContext.User.Identity.Name))
+        {
             return null;
-        else
-            return _context.Users.FirstOrDefault(u => u.UserName == name);
+        }
+
+        string name = httpContext.User.Identity.Name;
+        return _context.Users.FirstOrDefault(u => u.UserName == name);
     }
 }

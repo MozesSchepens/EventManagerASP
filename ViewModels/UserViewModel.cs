@@ -1,9 +1,9 @@
-﻿using EventManagerADV.Data;
-using EventManagerADV.Models;
+﻿using EventManagerASP.Data;
+using EventManagerASP.Models;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace EventManagerADV.ViewModels
+namespace EventManagerASP.ViewModels
 {
     public class UserViewModel
     {

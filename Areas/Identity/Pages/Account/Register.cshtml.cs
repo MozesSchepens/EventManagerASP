@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using EventManagerADV.Models;
+using EventManagerASP.Models;
 
-namespace EventManagerADV.Areas.Identity.Pages.Account
+namespace EventManagerASP.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
@@ -59,7 +59,7 @@ namespace EventManagerADV.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; } = string.Empty;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
 

@@ -1,4 +1,4 @@
-﻿namespace EventManagerADV.APIModels
+﻿namespace EventManagerASP.APIModels
 {
     public class LoginModel
     {

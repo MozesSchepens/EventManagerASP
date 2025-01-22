@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EventManagerADV.Models
+namespace EventManagerASP.Models
 {
     public class Organisator
     {

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace EventManagerADV.Services
+namespace EventManagerASP.Services
 {
     public class MyMiddleWare
     {

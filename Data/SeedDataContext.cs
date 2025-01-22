@@ -1,11 +1,11 @@
-﻿using EventManagerADV.Models;
+﻿using EventManagerASP.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EventManagerADV.Data
+namespace EventManagerASP.Data
 {
     public class SeedDataContext
     {

@@ -1,64 +1,71 @@
-using AspNetCore.Unobtrusive.Ajax;
-using EventManagerADV.Services;
-using EventManagerADV.Data;
-using EventManagerADV.Models;
+using EventManagerASP.Services;
+using EventManagerASP.Data;
+using EventManagerASP.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using NETCore.MailKit.Infrastructure.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Database configuratie
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Identity configuratie
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
+// Services
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddUnobtrusiveAjax();
-
+// Remove or ensure you have the correct package for AddUnobtrusiveAjax
+// builder.Services.AddUnobtrusiveAjax();
 builder.Services.AddControllers();
 
+// E-mail configuratie
 builder.Services.Configure<MailKitOptions>(builder.Configuration.GetSection("ExternalProviders:MailKit:SMTP"));
 builder.Services.AddTransient<IEmailSender, MailKitEmailSender>();
 
+// Localisatie configuratie
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddMvc()
     .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
     .AddDataAnnotationsLocalization();
 
+// Swagger configuratie
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "EventManagerADV", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "EventManagerASP", Version = "v1" });
 });
 
+// Custom services
 builder.Services.AddTransient<IMyUser, MyUser>();
 
 var app = builder.Build();
+
+// Global configuratie
 Globals.App = app;
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EventManagerADV v1"));
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EventManagerASP v1"));
 }
 else
 {
     app.UseExceptionHandler("/Home/Error");
 }
 
+// Database seeding
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -69,6 +76,7 @@ using (var scope = app.Services.CreateScope())
     SeedDataContext.Initialize(context, userManager, roleManager).Wait();
 }
 
+// Localisatie instellingen
 var supportedCultures = new[] { "en-US", "fr", "nl" };
 var localizationOptions = new RequestLocalizationOptions()
     .SetDefaultCulture(supportedCultures[0])
@@ -76,6 +84,7 @@ var localizationOptions = new RequestLocalizationOptions()
     .AddSupportedUICultures(supportedCultures);
 app.UseRequestLocalization(localizationOptions);
 
+// Middleware en routes
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();

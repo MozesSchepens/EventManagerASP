@@ -1,10 +1,10 @@
-﻿using EventManagerADV.APIModels;
-using EventManagerADV.Models;
+﻿using EventManagerASP.APIModels;
+using EventManagerASP.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EventManagerADV.APIControllers
+namespace EventManagerASP.APIControllers
 {
     [Route("api/[controller]")]
     [ApiController]

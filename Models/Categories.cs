@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace EventManagerADV.Models
+namespace EventManagerASP.Models
 {
     public class Category
     {
