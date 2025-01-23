@@ -100,7 +100,7 @@ namespace EventManagerASP.Areas.Identity.Pages.Account
                     var existingEvents = await _context.Events.ToListAsync();
                     foreach (var ev in existingEvents)
                     {
-                        _context.Organisator.Add(new Organisator
+                        _context.Organisators.Add(new Organisator
                         {
                             UserId = user.Id,
                             EventId = ev.Id

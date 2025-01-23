@@ -1,6 +1,5 @@
 ﻿using EventManagerASP.Data;
 using EventManagerASP.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -8,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace EventManagerASP.Controllers
 {
-    [Authorize] // Zorgt ervoor dat alleen ingelogde gebruikers events kunnen aanmaken
     public class EventsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,19 +18,32 @@ namespace EventManagerASP.Controllers
 
         public IActionResult Create()
         {
+            ViewBag.Categories = _context.Categories.ToList();
             return View();
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,StartDate,EndDate,CategoryId")] Event eventModel)
+        public async Task<IActionResult> Create(Event eventModel)
         {
             if (ModelState.IsValid)
             {
+                var category = await _context.Categories.FindAsync(eventModel.CategoryId);
+                if (category == null)
+                {
+                    ModelState.AddModelError("CategoryId", "Ongeldige categorie geselecteerd.");
+                    ViewBag.Categories = _context.Categories.ToList();
+                    return View(eventModel);
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+                eventModel.StartedById = user?.Id ?? string.Empty;
+
                 _context.Events.Add(eventModel);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Home");
             }
+
+            ViewBag.Categories = _context.Categories.ToList();
             return View(eventModel);
         }
     }

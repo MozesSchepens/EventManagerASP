@@ -23,7 +23,7 @@ namespace EventManagerASP.Controllers
         // GET: Organisators
         public async Task<IActionResult> Index(int eventId)
         {
-            var organisators = await _context.Organisator
+            var organisators = await _context.Organisators
                                              .Where(o => o.EventId == eventId && (o.Deleted == null || o.Deleted > DateTime.UtcNow))
                                              .Include(o => o.OrganisatorUser)
                                              .Include(o => o.Event)
@@ -69,7 +69,7 @@ namespace EventManagerASP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var organisator = await _context.Organisator.FindAsync(id);
+            var organisator = await _context.Organisators.FindAsync(id);
             if (organisator != null)
             {
                 organisator.Deleted = DateTime.UtcNow; // Soft delete
@@ -82,7 +82,7 @@ namespace EventManagerASP.Controllers
 
         private bool OrganisatorExists(int id)
         {
-            return _context.Organisator.Any(o => o.Id == id);
+            return _context.Organisators.Any(o => o.Id == id);
         }
     }
 }

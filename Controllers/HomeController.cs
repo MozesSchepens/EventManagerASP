@@ -28,7 +28,7 @@ public class HomeController : Controller
         else
         {
             ViewBag.Events = await _context.Events
-                .Where(e => _context.Organisator.Any(o => o.EventId == e.Id && o.UserId == userId))
+                .Where(e => _context.Organisators.Any(o => o.EventId == e.Id && o.UserId == userId))
                 .ToListAsync();
         }
 

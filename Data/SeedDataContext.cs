@@ -27,24 +27,33 @@ namespace EventManagerASP.Data
                 }
             }
 
-            if (!await userManager.Users.AnyAsync(u => u.Email == "admin@example.com"))
+            var adminUser = await userManager.FindByEmailAsync("admin@example.com");
+            if (adminUser == null)
             {
                 logger.LogInformation("Seeding admin user...");
 
-                var adminUser = new ApplicationUser
+                adminUser = new ApplicationUser
                 {
                     UserName = "SystemAdmin",
-                    FirstName = "Admin",
-                    LastName = "User",
                     Email = "admin@example.com",
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FirstName = "Admin",
+                    LastName = "User"
                 };
 
                 var result = await userManager.CreateAsync(adminUser, "Admin!12345");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
+                    // ✅ Controleer of de rol bestaat voordat je deze toevoegt aan de gebruiker
+                    if (await roleManager.RoleExistsAsync("SystemAdmin"))
+                    {
+                        await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
+                    }
+                    else
+                    {
+                        logger.LogError("Role SystemAdmin was not found!");
+                    }
                 }
                 else
                 {
@@ -53,6 +62,20 @@ namespace EventManagerASP.Data
                         logger.LogError($"Error creating admin user: {error.Description}");
                     }
                 }
+            }
+
+            if (!context.Categories.Any())
+            {
+                var categories = new List<Category>
+                {
+                    new Category { Name = "Feest" },
+                    new Category { Name = "Eten" },
+                    new Category { Name = "Kerst" },
+                    new Category { Name = "Festival" }
+                };
+
+                context.Categories.AddRange(categories);
+                await context.SaveChangesAsync();
             }
 
             if (!context.Events.Any())
@@ -69,9 +92,9 @@ namespace EventManagerASP.Data
 
                 List<Event> events = new List<Event>
                 {
-                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", CategoryId = etenCategory, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", CategoryId = kerstCategory, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", CategoryId = festivalCategory, StartedById = defaultUser?.Id ?? string.Empty }
+                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = etenCategory, StartedById = defaultUser?.Id ?? string.Empty },
+                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = kerstCategory, StartedById = defaultUser?.Id ?? string.Empty },
+                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = festivalCategory, StartedById = defaultUser?.Id ?? string.Empty }
                 };
 
                 context.Events.AddRange(events);
