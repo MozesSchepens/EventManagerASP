@@ -1,67 +1,77 @@
-﻿@model IEnumerable<EventManagerASP.Models.Event>
+﻿@model IEnumerable<Event>
+<style>
+    .page-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #FFD700;
+    }
 
-@{
-    ViewData["Title"] = "Index";
-}
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #fff;
+    }
 
-<h1>Index</h1>
+    .event-list {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th></th>
-        </tr>
-        <tr>
-            <form asp-controller="Projects" asp-action="Index" method="get">
-                <th>
-                    <input name="name" value="@ViewBag.Name" onchange="this.form.submit()"/>
-                </th>
-            <th>
-                <input name="description" value="@ViewBag.Description" onchange="this.form.submit()" />
-            </th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th> 
-                <select name="Category" class="form-control" asp-items="@ViewBag.Categories" onchange="this.form.submit()"></select>
-            </th>
-            </form>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryId)
-                @Html.DisplayFor(modelItem => item.Category.Name)
-            </td>
-            <td>
-                    <a asp-controller="Organisators" asp-action="Index" asp-route-projectId="@item.Id">Members</a> |
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        .event-list h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
 
+        .event-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .event-list li {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+            .event-list li:last-child {
+                border-bottom: none;
+            }
+
+    .event-link {
+        color: #FFD700;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+        .event-link:hover {
+            color: #FFA500;
+            text-decoration: underline;
+        }
+
+    .search-box {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+</style>
+
+<h2 class="page-title">Welkom bij het EventPlanner Systeem</h2>
+<p class="page-subtitle">Hier kunt u evenementen beheren en details bekijken.</p>
+
+<div class="event-list">
+    <h3>Evenementen</h3>
+    <input type="text" class="form-control search-box" placeholder="Zoeken..." id="searchBox">
+    <ul class="list-group mt-2">
+        @foreach (var eventItem in Model)
+        {
+            <li class="list-group-item">
+                <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="event-link">
+                    @eventItem.Name
+                </a>
+            </li>
+        }
+    </ul>
+</div>

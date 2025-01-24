@@ -16,6 +16,12 @@ namespace EventManagerASP.Controllers
             _context = context;
         }
 
+        public async Task<IActionResult> Index()
+        {
+            var events = await _context.Events.Include(e => e.Category).ToListAsync();
+            return View(events);
+        }
+
         public IActionResult Create()
         {
             ViewBag.Categories = _context.Categories.ToList();
@@ -44,6 +50,20 @@ namespace EventManagerASP.Controllers
             }
 
             ViewBag.Categories = _context.Categories.ToList();
+            return View(eventModel);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var eventModel = await _context.Events
+                .Include(e => e.Category)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (eventModel == null)
+            {
+                return NotFound();
+            }
+
             return View(eventModel);
         }
     }

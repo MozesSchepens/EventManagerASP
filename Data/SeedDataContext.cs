@@ -15,14 +15,12 @@ namespace EventManagerASP.Data
             context.Database.EnsureCreated();
             await context.Database.MigrateAsync();
 
-            // ✅ Zorg ervoor dat de rollen bestaan voordat gebruikers worden aangemaakt
             string[] roleNames = { "User", "UserAdmin", "SystemAdmin" };
 
             foreach (var roleName in roleNames)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))
                 {
-                    logger.LogInformation($"Creating role: {roleName}");
                     await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
@@ -30,8 +28,6 @@ namespace EventManagerASP.Data
             var adminUser = await userManager.FindByEmailAsync("admin@example.com");
             if (adminUser == null)
             {
-                logger.LogInformation("Seeding admin user...");
-
                 adminUser = new ApplicationUser
                 {
                     UserName = "SystemAdmin",
@@ -45,14 +41,9 @@ namespace EventManagerASP.Data
 
                 if (result.Succeeded)
                 {
-                    // ✅ Controleer of de rol bestaat voordat je deze toevoegt aan de gebruiker
                     if (await roleManager.RoleExistsAsync("SystemAdmin"))
                     {
                         await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
-                    }
-                    else
-                    {
-                        logger.LogError("Role SystemAdmin was not found!");
                     }
                 }
                 else
@@ -80,8 +71,6 @@ namespace EventManagerASP.Data
 
             if (!context.Events.Any())
             {
-                logger.LogInformation("Seeding events...");
-
                 var categories = await context.Categories.ToListAsync();
                 var feestCategory = categories.FirstOrDefault(c => c.Name == "Feest")?.Id ?? 1;
                 var etenCategory = categories.FirstOrDefault(c => c.Name == "Eten")?.Id ?? 2;
@@ -100,8 +89,6 @@ namespace EventManagerASP.Data
                 context.Events.AddRange(events);
                 await context.SaveChangesAsync();
             }
-
-            logger.LogInformation("Seeding completed.");
         }
     }
 }
