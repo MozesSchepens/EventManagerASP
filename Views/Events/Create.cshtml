@@ -1,63 +1,28 @@
-﻿@model EventManagerASP.Models.Event
-<style>
-    .event-form {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 20px;
-    }
+﻿@model Event
 
-        .event-form label {
-            font-weight: bold;
-            color: #FFD700;
-        }
-
-        .event-form input,
-        .event-form select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        .event-form button {
-            background-color: #D4A017;
-            color: #fff;
-            font-weight: bold;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-            .event-form button:hover {
-                background-color: #FFA500;
-            }
-
-</style>
-<h2 class="page-title">Nieuw Evenement</h2>
-
-<form method="post" class="event-form">
-    <div class="form-group">
-        <label>Naam:</label>
-        <input type="text" asp-for="Name" class="form-control">
-    </div>
-    <div class="form-group">
-        <label>Beschrijving:</label>
-        <input type="text" asp-for="Description" class="form-control">
-    </div>
-    <div class="form-group">
-        <label>Startdatum:</label>
-        <input type="datetime-local" asp-for="StartDate" class="form-control">
-    </div>
-    <div class="form-group">
-        <label>Einddatum:</label>
-        <input type="datetime-local" asp-for="EndDate" class="form-control">
-    </div>
-    <div class="form-group">
-        <label>Categorie:</label>
-        <select asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="form-control"></select>
-    </div>
-    <button type="submit" class="btn btn-primary">Toevoegen</button>
-</form>
+<div class="container">
+    <h2 class="text-warning text-center">Nieuw Evenement</h2>
+    <form method="post" class="event-form bg-secondary text-light p-4 rounded">
+        <div class="mb-3">
+            <label class="form-label text-warning">Naam:</label>
+            <input type="text" asp-for="Name" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label text-warning">Beschrijving:</label>
+            <input type="text" asp-for="Description" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label text-warning">Startdatum:</label>
+            <input type="datetime-local" asp-for="StartDate" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label text-warning">Einddatum:</label>
+            <input type="datetime-local" asp-for="EndDate" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label text-warning">Categorie:</label>
+            <select asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="form-control"></select>
+        </div>
+        <button type="submit" class="btn btn-warning text-dark fw-bold">Toevoegen</button>
+    </form>
+</div>

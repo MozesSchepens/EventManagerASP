@@ -1,77 +1,34 @@
-﻿@model IEnumerable<Event>
-<style>
-    .page-title {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #FFD700;
-    }
+﻿@model List<EventManagerASP.Models.Event>
 
-    .page-subtitle {
-        font-size: 1.2rem;
-        color: #fff;
-    }
+@{
+    ViewData["Title"] = "Evenementenlijst";
+}
 
-    .event-list {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 20px;
-    }
+<div class="container mt-4">
+    <h2 class="text-warning">Evenementenlijst</h2>
 
-        .event-list h3 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #FFD700;
-        }
+    <input type="text" class="form-control mb-3" placeholder="Zoeken..." id="searchBox">
 
-        .event-list ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .event-list li {
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-            .event-list li:last-child {
-                border-bottom: none;
-            }
-
-    .event-link {
-        color: #FFD700;
-        font-weight: bold;
-        text-decoration: none;
-    }
-
-        .event-link:hover {
-            color: #FFA500;
-            text-decoration: underline;
-        }
-
-    .search-box {
-        width: 100%;
-        padding: 8px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
-
-</style>
-
-<h2 class="page-title">Welkom bij het EventPlanner Systeem</h2>
-<p class="page-subtitle">Hier kunt u evenementen beheren en details bekijken.</p>
-
-<div class="event-list">
-    <h3>Evenementen</h3>
-    <input type="text" class="form-control search-box" placeholder="Zoeken..." id="searchBox">
-    <ul class="list-group mt-2">
-        @foreach (var eventItem in Model)
+    <div class="list-group">
+        @if (Model != null && Model.Any())
         {
-            <li class="list-group-item">
-                <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="event-link">
-                    @eventItem.Name
-                </a>
-            </li>
+            @foreach (var eventItem in Model)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-warning">@eventItem.Name - @eventItem.Category.Name</span>
+                    <div>
+                        <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-primary">Details</a>
+                        <a href="@Url.Action("Edit", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-warning">Bewerken</a>
+                        <a href="@Url.Action("Delete", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-danger">Verwijderen</a>
+                    </div>
+                </div>
+            }
         }
-    </ul>
+        else
+        {
+            <div class="text-center p-3 bg-dark text-light rounded">Geen evenementen beschikbaar.</div>
+        }
+    </div>
+
+    <a href="@Url.Action("Create", "Events")" class="btn btn-warning mt-3">Nieuw Evenement</a>
 </div>

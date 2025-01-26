@@ -66,5 +66,61 @@ namespace EventManagerASP.Controllers
 
             return View(eventModel);
         }
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var eventModel = await _context.Events.FindAsync(id);
+            if (eventModel == null)
+                return NotFound();
+
+            ViewBag.Categories = _context.Categories.ToList();
+            return View(eventModel);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Event eventModel)
+        {
+            if (id != eventModel.Id)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(eventModel);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.Categories = _context.Categories.ToList();
+            return View(eventModel);
+        }
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var eventModel = await _context.Events
+                .Include(e => e.Category)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (eventModel == null)
+                return NotFound();
+
+            return View(eventModel);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var eventModel = await _context.Events.FindAsync(id);
+            if (eventModel == null)
+                return NotFound();
+
+            _context.Events.Remove(eventModel);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

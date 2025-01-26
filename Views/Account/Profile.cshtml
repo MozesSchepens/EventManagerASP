@@ -1,0 +1,38 @@
+﻿@model ProfileViewModel
+@{
+    ViewData["Title"] = "Profiel";
+}
+
+<div class="container mt-4">
+    <h2 class="text-warning text-center">Mijn Profiel</h2>
+    <p class="text-center">Hier kunt u uw profielgegevens bekijken en bewerken.</p>
+
+    <form method="post" asp-action="Profile">
+        <div class="mb-3">
+            <label for="username" class="form-label">Gebruikersnaam</label>
+            <input type="text" class="form-control" id="username" name="UserName" value="@Model.UserName" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" class="form-control" id="email" name="Email" value="@Model.Email" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="firstName" class="form-label">Voornaam</label>
+            <input type="text" class="form-control" id="firstName" name="FirstName" value="@Model.FirstName">
+        </div>
+
+        <div class="mb-3">
+            <label for="lastName" class="form-label">Achternaam</label>
+            <input type="text" class="form-control" id="lastName" name="LastName" value="@Model.LastName">
+        </div>
+
+        <div class="mb-3">
+            <label for="phoneNumber" class="form-label">Telefoonnummer</label>
+            <input type="text" class="form-control" id="phoneNumber" name="PhoneNumber" value="@Model.PhoneNumber">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+</div>

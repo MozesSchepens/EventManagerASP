@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Contact";
+}
+
+<div class="container mt-4">
+    <h2 class="text-warning">Neem Contact Op</h2>
+    <p>Heb je vragen of opmerkingen? Vul het onderstaande formulier in en we nemen zo snel mogelijk contact met je op.</p>
+
+    <form method="post" asp-action="Contact">
+        <div class="mb-3">
+            <label for="name" class="form-label">Naam</label>
+            <input type="text" class="form-control" id="name" name="Name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" class="form-control" id="email" name="Email" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="message" class="form-label">Bericht</label>
+            <textarea class="form-control" id="message" name="Message" rows="4" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Verstuur</button>
+    </form>
+</div>

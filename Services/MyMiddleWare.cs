@@ -1,30 +1,35 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Threading.Tasks;
 
-namespace EventManagerASP.Services
+public class MyMiddleware
 {
-    public class MyMiddleWare
+    private readonly RequestDelegate _next;
+    private readonly ILogger<MyMiddleware> _logger;
+
+    public MyMiddleware(RequestDelegate next, ILogger<MyMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-
-        public MyMiddleWare(RequestDelegate next)
-        {
-            _next = next;
-        }
-
-        public Task Invoke(HttpContext httpContext)
-        {
-
-            return _next(httpContext);
-        }
+        _next = next;
+        _logger = logger;
     }
 
-    public static class MyMiddleWareExtensions
+    public async Task InvokeAsync(HttpContext context)
     {
-        public static IApplicationBuilder UseMyMiddleWare(this IApplicationBuilder builder)
+        var cultureFeature = context.Features.Get<IRequestCultureFeature>();
+        var currentCulture = cultureFeature?.RequestCulture.Culture ?? new CultureInfo("en-US");
+
+        _logger.LogInformation($"Actieve taal: {currentCulture.Name}");
+
+        var cultureCookie = context.Request.Cookies[CookieRequestCultureProvider.DefaultCookieName];
+        if (!string.IsNullOrEmpty(cultureCookie))
         {
-            return builder.UseMiddleware<MyMiddleWare>();
+            var culture = CookieRequestCultureProvider.ParseCookieValue(cultureCookie).Cultures[0].Value;
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+            CultureInfo.CurrentUICulture = new CultureInfo(culture);
         }
+
+        await _next(context);
     }
 }

@@ -1,30 +1,36 @@
-﻿@{
+﻿@model List<EventManagerASP.Models.Event>
+
+@{
     ViewData["Title"] = "Home";
 }
 
-<div class="container">
-    <h2>Welkom bij het EventPlanner Systeem</h2>
+<div class="container mt-4">
+    <h2 class="text-warning">Welkom bij het EventPlanner Systeem</h2>
     <p>Hier kunt u evenementen beheren en details bekijken.</p>
 
-    <div class="sidebar">
-        <h2>Evenementen</h2>
-        <input type="text" placeholder="Zoeken..." class="search-box">
-
-        <div class="event-list">
-            @if (ViewBag.Events != null && ViewBag.Events.Count > 0)
+    <div class="event-list">
+        <h3 class="text-warning">Evenementen</h3>
+        <input type="text" class="form-control" placeholder="Zoeken..." id="searchBox">
+        <ul class="list-group mt-2">
+            @if (Model != null && Model.Any())
             {
-                @foreach (var eventItem in ViewBag.Events)
+                @foreach (var eventItem in Model)
                 {
-                    <div class="event-item">
-                        <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })">@eventItem.Name</a>
-                    </div>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@eventItem.Name - @eventItem.Category.Name</span>
+                        <div>
+                            <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-info">Details</a>
+                            <a href="@Url.Action("Edit", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-warning">Bewerken</a>
+                            <a href="@Url.Action("Delete", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-danger">Verwijderen</a>
+                        </div>
+                    </li>
                 }
             }
             else
             {
-                <p>Geen evenementen beschikbaar.</p>
+                <li class="list-group-item text-center">Geen evenementen beschikbaar.</li>
             }
-        </div>
-
-        <a href="@Url.Action("Create", "Events")" class="button">Nieuw Evenement</a>
-        </
+        </ul>
+        <a href="@Url.Action("Create", "Events")" class="btn btn-warning mt-3">Nieuw Evenement</a>
+    </div>
+</div>
