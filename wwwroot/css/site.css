@@ -1,11 +1,15 @@
 body {
-    background-color: #5C1A1B;
+    background-color: bord;
     color: #fff;
     font-family: Arial, sans-serif;
 }
 
 .navbar {
     background-color: #D4A017 !important;
+   
+}
+.bg-warning {
+    background-color: yellow !important;
 }
 
 .navbar-brand, .nav-link {
@@ -58,7 +62,7 @@ input#searchBox {
 }
 .container {
     max-width: 600px;
-    background-color: #3a1f1f;
+    background-color: #5A002C;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
@@ -103,4 +107,6 @@ h2.text-warning {
 .fa-user-circle {
     color: #ffd700;
 }
-
+p {
+    color: #ffc107;
+}

@@ -18,9 +18,9 @@
 </head>
 <body class="bg-dark text-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-warning">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand text-dark fw-bold" href="@Url.Action("Index", "Home")">EventPlanner</a>
+            <a class="navbar-brand text-warning fw-bold" href="@Url.Action("Index", "Home")">EventPlanner</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -78,7 +78,7 @@
         @RenderBody()
     </div>
 
-    <footer class="footer text-center mt-5 py-3 bg-warning text-dark">
+    <footer class="footer text-center mt-5 py-3 bg-dark text-light">
         <div class="container">
             <p>&copy; @DateTime.Now.Year EventPlanner - Alle rechten voorbehouden</p>
         </div>
