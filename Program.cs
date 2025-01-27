@@ -23,14 +23,12 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
 
-// **DATABASE: GEBRUIK SQLITE**
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Data Source=eventmanager.db";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 
-// **IDENTITY CONFIG**
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
@@ -46,11 +44,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
-// **EMAIL VERZENDING**
 builder.Services.Configure<MailKitOptions>(builder.Configuration.GetSection("ExternalProviders:MailKit:SMTP"));
 builder.Services.AddTransient<IEmailSender, MailKitEmailSender>();
 
-// **MEERTALIGE ONDERSTEUNING**
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.AddMvc()
@@ -63,7 +59,6 @@ builder.Services.AddMvc()
         options.DataAnnotationLocalizerProvider = (t, f) => localizer;
     });
 
-// **TAALCONFIGURATIE**
 var supportedCultures = new[]
 {
     new CultureInfo("en-US"),
@@ -93,7 +88,6 @@ builder.Services.AddTransient<IMyUser, MyUser>();
 var app = builder.Build();
 Globals.App = app;
 
-// **FOUTEN AFVANGEN**
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -104,10 +98,8 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-// **TAALOPTIES LADEN**
 app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
-// **DATABASE MIGRATIE + SEEDING**
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -119,12 +111,20 @@ using (var scope = app.Services.CreateScope())
     try
     {
         context.Database.Migrate();
-        SeedDataContext.Initialize(context, userManager, roleManager, logger).Wait();
-        logger.LogInformation("✅ Database migratie voltooid en seeding succesvol.");
+
+        if (!context.Users.Any() || !context.Roles.Any())
+        {
+            logger.LogInformation(" Geen gebruikers of rollen gevonden, seeding uitvoeren...");
+            SeedDataContext.Initialize(context, userManager, roleManager, logger).Wait();
+        }
+        else
+        {
+            logger.LogInformation(" Database bevat al gebruikers en rollen, geen seeding nodig.");
+        }
     }
     catch (Exception ex)
     {
-        logger.LogError($"❌ Database seeding mislukt: {ex.Message}\n{ex.StackTrace}");
+        logger.LogError($" Database seeding mislukt: {ex.Message}\n{ex.StackTrace}");
     }
 }
 
@@ -134,7 +134,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// **FOUTEN AFVANGEN IN REQUESTS**
 app.Use(async (context, next) =>
 {
     try
@@ -144,12 +143,11 @@ app.Use(async (context, next) =>
     catch (Exception ex)
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogError($"❌ Onverwachte fout: {ex.Message}\n{ex.StackTrace}");
+        logger.LogError($" Onverwachte fout: {ex.Message}\n{ex.StackTrace}");
         context.Response.Redirect("/Home/Error?statusCode=500");
     }
 });
 
-// **ROUTES**
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

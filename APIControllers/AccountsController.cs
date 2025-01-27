@@ -1,38 +1,84 @@
-﻿using EventManagerASP.APIModels;
-using EventManagerASP.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using EventManagerASP.Models;
+using Microsoft.Extensions.Logging;
 
-namespace EventManagerASP.APIControllers
+namespace EventManagerASP.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AccountController> _logger;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccountsController(SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager,
+                                 SignInManager<ApplicationUser> signInManager,
+                                 RoleManager<IdentityRole> roleManager,
+                                 ILogger<AccountController> logger)
         {
+            _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
+            _logger = logger;
         }
 
         [HttpPost]
-        [Route("/api/login")]
-        public async Task<ActionResult<Boolean>> PostAccount([FromBody] ApiLoginModel login)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            var result = await _signInManager.PasswordSignInAsync(login.Name, login.Password, true, lockoutOnFailure: false);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Registratie mislukt: ongeldige invoer.");
+                return View(model);
+            }
 
-            return result.Succeeded;
+            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation($"Nieuwe gebruiker {user.Email} geregistreerd.");
+
+                if (!await _roleManager.RoleExistsAsync("Admin"))
+                {
+                    _logger.LogInformation("Rol 'Admin' niet gevonden, wordt aangemaakt.");
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                }
+
+                await _userManager.AddToRoleAsync(user, "Admin");
+                _logger.LogInformation($"Gebruiker {user.Email} toegevoegd aan de rol 'Admin'.");
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Index", "Home");
+            }
+
+            _logger.LogError($"Registratie mislukt voor {user.Email}. Fouten: {string.Join(", ", result.Errors)}");
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            if (User.Identity.IsAuthenticated)
+            {
+                await _signInManager.SignOutAsync();
+                _logger.LogInformation("Gebruiker succesvol uitgelogd.");
+            }
+            else
+            {
+                _logger.LogWarning("Uitlogpoging zonder ingelogde gebruiker.");
+            }
+
             return RedirectToAction("Index", "Home");
         }
-
     }
-
 }

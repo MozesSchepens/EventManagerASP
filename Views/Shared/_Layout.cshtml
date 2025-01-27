@@ -58,6 +58,19 @@
                         </li>
                     }
                 </ul>
+                <ul class="navbar-nav">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-warning" asp-controller="Admin" asp-action="ManageUsersRoles">Gebruikersbeheer</a>
+                            </li>
+                        }
+                    }
+                </ul>
+
+
                 <form asp-controller="Home" asp-action="SetLanguage" method="post" class="ms-3">
                     <select name="culture" class="form-select" onchange="this.form.submit();">
                         @{

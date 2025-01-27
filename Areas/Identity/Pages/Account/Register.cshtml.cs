@@ -80,7 +80,7 @@ namespace EventManagerASP.Areas.Identity.Pages.Account
                     Email = Input.Email,
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
-                    EmailConfirmed = true // Automatisch bevestigen (optioneel)
+                    EmailConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -89,26 +89,27 @@ namespace EventManagerASP.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // ✅ Voeg standaardrol toe (User)
-                    if (!await _roleManager.RoleExistsAsync("User"))
+                    if (!await _roleManager.RoleExistsAsync("Admin"))
                     {
-                        await _roleManager.CreateAsync(new IdentityRole("User"));
+                        await _roleManager.CreateAsync(new IdentityRole("Admin"));
                     }
-                    await _userManager.AddToRoleAsync(user, "User");
 
-                    // ✅ Voeg gebruiker toe als organisator van alle bestaande evenementen
+                    await _userManager.AddToRoleAsync(user, "Admin");
+
                     var existingEvents = await _context.Events.ToListAsync();
-                    foreach (var ev in existingEvents)
+                    if (existingEvents.Any())
                     {
-                        _context.Organisators.Add(new Organisator
+                        foreach (var ev in existingEvents)
                         {
-                            UserId = user.Id,
-                            EventId = ev.Id
-                        });
+                            _context.Organisators.Add(new Organisator
+                            {
+                                UserId = user.Id,
+                                EventId = ev.Id
+                            });
+                        }
+                        await _context.SaveChangesAsync();
                     }
-                    await _context.SaveChangesAsync();
 
-                    // ✅ Automatisch inloggen
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
                 }

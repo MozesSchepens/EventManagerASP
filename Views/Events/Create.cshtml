@@ -2,34 +2,37 @@
 
 <div class="container">
     <h2 class="text-warning text-center">Nieuw Evenement</h2>
-    <form id="createEventForm" class="event-form bg-secondary text-light p-4 rounded">
+    <form method="post" class="event-form bg-secondary text-light p-4 rounded">
         <div class="mb-3">
             <label class="form-label text-warning">Naam:</label>
-            <input type="text" id="eventName" asp-for="Name" class="form-control">
+            <input type="text" asp-for="Name" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Beschrijving:</label>
-            <input type="text" id="eventDescription" asp-for="Description" class="form-control">
+            <input type="text" asp-for="Description" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Startdatum:</label>
-            <input type="datetime-local" id="eventStartDate" asp-for="StartDate" class="form-control">
+            <input type="datetime-local" asp-for="StartDate" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Einddatum:</label>
-            <input type="datetime-local" id="eventEndDate" asp-for="EndDate" class="form-control">
+            <input type="datetime-local" asp-for="EndDate" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Categorie:</label>
-            <select id="eventCategory" asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="form-control"></select>
+            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control">
+                <option value="">-- Selecteer een categorie --</option>
+            </select>
         </div>
         <button type="submit" class="btn btn-warning text-dark fw-bold">Toevoegen</button>
     </form>
 </div>
+
 <script>
     $(document).ready(function () {
         $(".event-form").submit(function (e) {
-            e.preventDefault(); // Voorkom standaard form-verzending
+            e.preventDefault(); 
 
             let eventData = {
                 Name: $("input[name='Name']").val(),
@@ -47,7 +50,7 @@
                 success: function (response) {
                     if (response.success) {
                         alert(response.message);
-                        addEventToList(response.event); // Voeg het nieuwe event toe aan de lijst
+                        addEventToList(response.event);
                     } else {
                         alert(response.message);
                     }

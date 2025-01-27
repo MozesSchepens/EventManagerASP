@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace EventManagerASP.Controllers
 {
@@ -30,36 +31,26 @@ namespace EventManagerASP.Controllers
             return View(events);
         }
 
-        public IActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromBody] Event eventModel)
+        public async Task<IActionResult> Create(Event model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Ongeldige invoer." });
+                _context.Events.Add(model);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index");
             }
-
-            var category = await _context.Categories.FindAsync(eventModel.CategoryId);
-            if (category == null)
-            {
-                return Json(new { success = false, message = "Ongeldige categorie geselecteerd." });
-            }
-
-            var user = await _userManager.GetUserAsync(User);
-            eventModel.StartedById = user?.Id ?? string.Empty;
-
-            _context.Events.Add(eventModel);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Evenement aangemaakt!", Event = eventModel });
+            ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
+            return View(model);
         }
-
         public async Task<IActionResult> Details(int id)
         {
             var eventModel = await _context.Events.Include(e => e.Category).FirstOrDefaultAsync(e => e.Id == id);

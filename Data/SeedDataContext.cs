@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,46 +13,16 @@ namespace EventManagerASP.Data
     {
         public static async Task Initialize(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<SeedDataContext> logger)
         {
-            context.Database.EnsureCreated();
             await context.Database.MigrateAsync();
 
-            string[] roleNames = { "User", "UserAdmin", "SystemAdmin" };
+            string[] roles = { "Admin", "User" };
 
-            foreach (var roleName in roleNames)
+            foreach (var role in roles)
             {
-                if (!await roleManager.RoleExistsAsync(roleName))
+                if (!await roleManager.RoleExistsAsync(role))
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
-                }
-            }
-
-            var adminUser = await userManager.FindByEmailAsync("admin@example.com");
-            if (adminUser == null)
-            {
-                adminUser = new ApplicationUser
-                {
-                    UserName = "SystemAdmin",
-                    Email = "admin@example.com",
-                    EmailConfirmed = true,
-                    FirstName = "Admin",
-                    LastName = "User"
-                };
-
-                var result = await userManager.CreateAsync(adminUser, "Admin!12345");
-
-                if (result.Succeeded)
-                {
-                    if (await roleManager.RoleExistsAsync("SystemAdmin"))
-                    {
-                        await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
-                    }
-                }
-                else
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        logger.LogError($"Error creating admin user: {error.Description}");
-                    }
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                    logger.LogInformation($"✅ Rol '{role}' aangemaakt.");
                 }
             }
 
@@ -67,27 +38,26 @@ namespace EventManagerASP.Data
 
                 context.Categories.AddRange(categories);
                 await context.SaveChangesAsync();
+                logger.LogInformation("✅ Categorieën succesvol toegevoegd.");
             }
 
             if (!context.Events.Any())
             {
-                var categories = await context.Categories.ToListAsync();
-                var feestCategory = categories.FirstOrDefault(c => c.Name == "Feest")?.Id ?? 1;
-                var etenCategory = categories.FirstOrDefault(c => c.Name == "Eten")?.Id ?? 2;
-                var kerstCategory = categories.FirstOrDefault(c => c.Name == "Kerst")?.Id ?? 3;
-                var festivalCategory = categories.FirstOrDefault(c => c.Name == "Festival")?.Id ?? 4;
-
-                var defaultUser = await userManager.FindByEmailAsync("admin@example.com");
+                var feestCategory = await context.Categories.Where(c => c.Name == "Feest").Select(c => c.Id).FirstOrDefaultAsync();
+                var etenCategory = await context.Categories.Where(c => c.Name == "Eten").Select(c => c.Id).FirstOrDefaultAsync();
+                var kerstCategory = await context.Categories.Where(c => c.Name == "Kerst").Select(c => c.Id).FirstOrDefaultAsync();
+                var festivalCategory = await context.Categories.Where(c => c.Name == "Festival").Select(c => c.Id).FirstOrDefaultAsync();
 
                 List<Event> events = new List<Event>
                 {
-                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = etenCategory, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = kerstCategory, StartedById = defaultUser?.Id ?? string.Empty },
-                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = festivalCategory, StartedById = defaultUser?.Id ?? string.Empty }
+                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = etenCategory },
+                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = kerstCategory },
+                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = festivalCategory }
                 };
 
                 context.Events.AddRange(events);
                 await context.SaveChangesAsync();
+                logger.LogInformation("✅ Standaard evenementen succesvol toegevoegd.");
             }
         }
     }

@@ -1,0 +1,39 @@
+﻿@model List<ApplicationUser>
+
+<h2>Gebruikersbeheer</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Naam</th>
+            <th>Email</th>
+            <th>Rollen</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    @foreach (var role in ViewBag.UserRoles[user.Id])
+                    {
+                        <span class="badge bg-primary">@role</span>
+                    }
+                </td>
+                <td>
+                    <a href="@Url.Action("ManageRoles", "Admin", new { id = user.Id })" class="btn btn-warning">Rollen Beheren</a>
+                    @if (!ViewBag.UserRoles[user.Id].Contains("Admin"))
+                    {
+                        <form asp-action="DeleteUser" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger">Verwijderen</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
