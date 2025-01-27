@@ -1,0 +1,11 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Foutmelding";
+}
+
+<h2>Oeps, er is iets misgegaan!</h2>
+
+<p>Statuscode: @Model.StatusCode</p>
+<p>Pagina: @Model.OriginalPath</p>
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-warning">Terug naar home</a>

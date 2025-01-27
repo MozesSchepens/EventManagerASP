@@ -2,6 +2,8 @@
 using EventManagerASP.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,16 +12,27 @@ namespace EventManagerASP.Controllers
     public class EventsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<EventsController> _logger;
 
-        public EventsController(ApplicationDbContext context)
+        public EventsController(ApplicationDbContext context, ILogger<EventsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var events = await _context.Events.Include(e => e.Category).ToListAsync();
-            return View(events);
+            try
+            {
+                var events = await _context.Events.Include(e => e.Category).ToListAsync();
+                return View(events);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error loading events: {ex.Message}");
+                TempData["ErrorMessage"] = "Evenementen kunnen momenteel niet geladen worden.";
+                return RedirectToAction("Error", "Home");
+            }
         }
 
         public IActionResult Create()
@@ -33,94 +46,22 @@ namespace EventManagerASP.Controllers
         {
             if (ModelState.IsValid)
             {
-                var category = await _context.Categories.FindAsync(eventModel.CategoryId);
-                if (category == null)
+                try
                 {
-                    ModelState.AddModelError("CategoryId", "Ongeldige categorie geselecteerd.");
-                    ViewBag.Categories = _context.Categories.ToList();
-                    return View(eventModel);
+                    _context.Events.Add(eventModel);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
-                eventModel.StartedById = user?.Id ?? string.Empty;
-
-                _context.Events.Add(eventModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Home");
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error creating event: {ex.Message}");
+                    TempData["ErrorMessage"] = "Fout bij het aanmaken van evenement.";
+                    return RedirectToAction("Error", "Home");
+                }
             }
 
             ViewBag.Categories = _context.Categories.ToList();
             return View(eventModel);
-        }
-
-        public async Task<IActionResult> Details(int id)
-        {
-            var eventModel = await _context.Events
-                .Include(e => e.Category)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            if (eventModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(eventModel);
-        }
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var eventModel = await _context.Events.FindAsync(id);
-            if (eventModel == null)
-                return NotFound();
-
-            ViewBag.Categories = _context.Categories.ToList();
-            return View(eventModel);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Event eventModel)
-        {
-            if (id != eventModel.Id)
-                return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                _context.Update(eventModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewBag.Categories = _context.Categories.ToList();
-            return View(eventModel);
-        }
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var eventModel = await _context.Events
-                .Include(e => e.Category)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            if (eventModel == null)
-                return NotFound();
-
-            return View(eventModel);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var eventModel = await _context.Events.FindAsync(id);
-            if (eventModel == null)
-                return NotFound();
-
-            _context.Events.Remove(eventModel);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

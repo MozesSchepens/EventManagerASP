@@ -1,15 +1,29 @@
 ﻿@model EventManagerASP.Models.ErrorViewModel
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Error</title>
-</head>
-<body>
-    <h1>An error occurred</h1>
-    <p>Request ID: @Model.RequestId</p>
-    <p>Please try again later or contact support if the problem persists.</p>
-</body>
-</html>
+@{
+    ViewData["Title"] = "Foutpagina";
+}
+
+<h2>Oeps! Er is iets misgegaan.</h2>
+
+@if (Model.StatusCode != 0)
+{
+    <p><strong>Statuscode:</strong> @Model.StatusCode</p>
+}
+
+@if (!string.IsNullOrEmpty(Model.OriginalPath))
+{
+    <p><strong>Oorspronkelijke URL:</strong> @Model.OriginalPath</p>
+}
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p><strong>Foutmelding:</strong> @Model.Message</p>
+}
+
+@if (Model.ShowRequestId)
+{
+    <p><strong>Request ID:</strong> @Model.RequestId</p>
+}
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-warning">Terug naar home</a>

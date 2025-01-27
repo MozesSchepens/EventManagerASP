@@ -15,17 +15,22 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using EventManagerASP;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Diagnostics;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
 
+// **DATABASE: GEBRUIK SQLITE**
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Data Source=eventmanager.db";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 
+// **IDENTITY CONFIG**
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
@@ -41,9 +46,11 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
+// **EMAIL VERZENDING**
 builder.Services.Configure<MailKitOptions>(builder.Configuration.GetSection("ExternalProviders:MailKit:SMTP"));
 builder.Services.AddTransient<IEmailSender, MailKitEmailSender>();
 
+// **MEERTALIGE ONDERSTEUNING**
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.AddMvc()
@@ -56,6 +63,7 @@ builder.Services.AddMvc()
         options.DataAnnotationLocalizerProvider = (t, f) => localizer;
     });
 
+// **TAALCONFIGURATIE**
 var supportedCultures = new[]
 {
     new CultureInfo("en-US"),
@@ -63,23 +71,16 @@ var supportedCultures = new[]
     new CultureInfo("nl-NL")
 };
 
-var localizationOptions = new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture("en-US"),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures,
-    RequestCultureProviders = new List<IRequestCultureProvider>
-    {
-        new CookieRequestCultureProvider(),
-        new AcceptLanguageHeaderRequestCultureProvider()
-    }
-};
-
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new RequestCulture("en-US");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new CookieRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    };
 });
 
 builder.Services.AddSwaggerGen(c =>
@@ -92,19 +93,21 @@ builder.Services.AddTransient<IMyUser, MyUser>();
 var app = builder.Build();
 Globals.App = app;
 
-if (app.Environment.IsDevelopment())
+// **FOUTEN AFVANGEN**
+if (!app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EventManagerASP v1"));
+    app.UseExceptionHandler("/Home/Error");
+    app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseDeveloperExceptionPage();
 }
 
+// **TAALOPTIES LADEN**
 app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
+// **DATABASE MIGRATIE + SEEDING**
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -115,20 +118,38 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        context.Database.Migrate(); 
+        context.Database.Migrate();
         SeedDataContext.Initialize(context, userManager, roleManager, logger).Wait();
+        logger.LogInformation("✅ Database migratie voltooid en seeding succesvol.");
     }
     catch (Exception ex)
     {
-        logger.LogError($"Database seeding failed: {ex.Message}");
+        logger.LogError($"❌ Database seeding mislukt: {ex.Message}\n{ex.StackTrace}");
     }
 }
 
+// **MIDDLEWARE INLADEN**
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// **FOUTEN AFVANGEN IN REQUESTS**
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next.Invoke();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError($"❌ Onverwachte fout: {ex.Message}\n{ex.StackTrace}");
+        context.Response.Redirect("/Home/Error?statusCode=500");
+    }
+});
+
+// **ROUTES**
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
