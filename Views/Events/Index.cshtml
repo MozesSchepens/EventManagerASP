@@ -9,7 +9,7 @@
 
     <input type="text" class="form-control mb-3" placeholder="Zoeken..." id="searchBox">
 
-    <div class="list-group">
+    <<div class="list-group">
         @if (Model != null && Model.Any())
         {
             @foreach (var eventItem in Model)
@@ -19,16 +19,13 @@
                     <div>
                         <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-primary">Details</a>
                         <a href="@Url.Action("Edit", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-warning">Bewerken</a>
-                        <a href="@Url.Action("Delete", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-danger"style="color:black">Verwijderen</a>
+                        <button class="btn btn-sm btn-danger deleteEvent" data-id="@eventItem.Id">Verwijderen</button>
                     </div>
                 </div>
             }
         }
-        else
-        {
-            <div class="text-center p-3 bg-dark text-light rounded">Geen evenementen beschikbaar.</div>
-        }
     </div>
+
 
     <a href="@Url.Action("Create", "Events")" class="btn btn-warning mt-3">Nieuw Evenement</a>
 </div>

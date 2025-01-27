@@ -2,27 +2,74 @@
 
 <div class="container">
     <h2 class="text-warning text-center">Nieuw Evenement</h2>
-    <form method="post" class="event-form bg-secondary text-light p-4 rounded">
+    <form id="createEventForm" class="event-form bg-secondary text-light p-4 rounded">
         <div class="mb-3">
             <label class="form-label text-warning">Naam:</label>
-            <input type="text" asp-for="Name" class="form-control">
+            <input type="text" id="eventName" asp-for="Name" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Beschrijving:</label>
-            <input type="text" asp-for="Description" class="form-control">
+            <input type="text" id="eventDescription" asp-for="Description" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Startdatum:</label>
-            <input type="datetime-local" asp-for="StartDate" class="form-control">
+            <input type="datetime-local" id="eventStartDate" asp-for="StartDate" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Einddatum:</label>
-            <input type="datetime-local" asp-for="EndDate" class="form-control">
+            <input type="datetime-local" id="eventEndDate" asp-for="EndDate" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label text-warning">Categorie:</label>
-            <select asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="form-control"></select>
+            <select id="eventCategory" asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="form-control"></select>
         </div>
         <button type="submit" class="btn btn-warning text-dark fw-bold">Toevoegen</button>
     </form>
 </div>
+<script>
+    $(document).ready(function () {
+        $(".event-form").submit(function (e) {
+            e.preventDefault(); // Voorkom standaard form-verzending
+
+            let eventData = {
+                Name: $("input[name='Name']").val(),
+                Description: $("input[name='Description']").val(),
+                StartDate: $("input[name='StartDate']").val(),
+                EndDate: $("input[name='EndDate']").val(),
+                CategoryId: $("select[name='CategoryId']").val()
+            };
+
+            $.ajax({
+                url: "/Events/Create",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(eventData),
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        addEventToList(response.event); // Voeg het nieuwe event toe aan de lijst
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("❌ Er is een fout opgetreden bij het maken van het evenement.");
+                }
+            });
+        });
+
+        function addEventToList(event) {
+            let eventHtml = `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-warning">${event.name} - ${event.categoryId}</span>
+                    <div>
+                        <a href="/Events/Details/${event.id}" class="btn btn-sm btn-primary">Details</a>
+                        <a href="/Events/Edit/${event.id}" class="btn btn-sm btn-warning">Bewerken</a>
+                        <button class="btn btn-sm btn-danger deleteEvent" data-id="${event.id}">Verwijderen</button>
+                    </div>
+                </div>
+            `;
+            $(".list-group").append(eventHtml);
+        }
+    });
+</script>
