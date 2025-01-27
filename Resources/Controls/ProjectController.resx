@@ -123,16 +123,4 @@
   <data name="Description" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="Estimated Budget" xml:space="preserve">
-    <value>Estimated Budget</value>
-  </data>
-  <data name="Name" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="Started" xml:space="preserve">
-    <value>Started</value>
-  </data>
-  <data name="Will end" xml:space="preserve">
-    <value>Will end</value>
-  </data>
 </root>

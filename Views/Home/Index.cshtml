@@ -1,36 +1,38 @@
-﻿@model List<EventManagerASP.Models.Event>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model List<EventManagerASP.Models.Event>
 
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = Localizer["Home"];
 }
 
 <div class="container mt-4">
-    <h2 class="text-warning">Welkom bij het EventPlanner Systeem</h2>
-    <p>Hier kunt u evenementen beheren en details bekijken.</p>
+    <h2 class="text-warning">@Localizer["Welcome"]</h2>
+    <p>@Localizer["Description"]</p>
 
     <div class="event-list">
-        <h3 class="text-warning">Evenementen</h3>
-        <input type="text" class="form-control" placeholder="Zoeken..." id="searchBox">
+        <h3 class="text-warning">@Localizer["Events"]</h3>
+        <input type="text" class="form-control" placeholder="@Localizer["Search"]" id="searchBox">
         <ul class="list-group mt-2">
             @if (Model != null && Model.Any())
             {
                 @foreach (var eventItem in Model)
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>@eventItem.Name - @eventItem.Category.Name</span>
+                        <span>@eventItem.Name - @(eventItem.Category != null ? eventItem.Category.Name : "Geen categorie")</span>
                         <div>
-                            <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-info">Details</a>
-                            <a href="@Url.Action("Edit", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-warning">Bewerken</a>
-                            <a href="@Url.Action("Delete", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-danger">Verwijderen</a>
+                            <a href="@Url.Action("Details", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-info">@Localizer["Details"]</a>
+                            <a href="@Url.Action("Edit", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-warning text-dark">@Localizer["Edit"]</a>
+                            <a href="@Url.Action("Delete", "Events", new { id = eventItem.Id })" class="btn btn-sm btn-danger">@Localizer["Delete"]</a>
                         </div>
                     </li>
                 }
             }
             else
             {
-                <li class="list-group-item text-center">Geen evenementen beschikbaar.</li>
+                <li class="list-group-item text-center">@Localizer["No events available"]</li>
             }
         </ul>
-        <a href="@Url.Action("Create", "Events")" class="btn btn-warning mt-3">Nieuw Evenement</a>
+        <a href="@Url.Action("Create", "Events")" class="btn btn-warning mt-3">@Localizer["New Event"]</a>
     </div>
 </div>

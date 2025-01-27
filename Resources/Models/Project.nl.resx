@@ -123,9 +123,6 @@
   <data name="Description" xml:space="preserve">
     <value>Omschrijving</value>
   </data>
-  <data name="Estimated Budget" xml:space="preserve">
-    <value>Geschat budget</value>
-  </data>
   <data name="Name" xml:space="preserve">
     <value>Naam</value>
   </data>

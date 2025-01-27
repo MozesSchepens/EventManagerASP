@@ -10,15 +10,21 @@ using NETCore.MailKit.Infrastructure.Internal;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using EventManagerASP;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    ?? "Data Source=eventmanager.db";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlite(connectionString));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -37,6 +43,18 @@ builder.Services.AddControllers();
 
 builder.Services.Configure<MailKitOptions>(builder.Configuration.GetSection("ExternalProviders:MailKit:SMTP"));
 builder.Services.AddTransient<IEmailSender, MailKitEmailSender>();
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+builder.Services.AddMvc()
+    .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+    .AddDataAnnotationsLocalization(options =>
+    {
+        var type = typeof(EventManagerASP.SharedResource);
+        var factory = builder.Services.BuildServiceProvider().GetRequiredService<IStringLocalizerFactory>();
+        var localizer = factory.Create(type);
+        options.DataAnnotationLocalizerProvider = (t, f) => localizer;
+    });
 
 var supportedCultures = new[]
 {
@@ -72,7 +90,6 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddTransient<IMyUser, MyUser>();
 
 var app = builder.Build();
-
 Globals.App = app;
 
 if (app.Environment.IsDevelopment())
@@ -98,6 +115,7 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
+        context.Database.Migrate(); 
         SeedDataContext.Initialize(context, userManager, roleManager, logger).Wait();
     }
     catch (Exception ex)

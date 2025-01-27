@@ -1,76 +1,46 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using Microsoft.Extensions.Localization;
+using System.Globalization;
 using System.Threading.Tasks;
 using EventManagerASP.Data;
 using EventManagerASP.Models;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Localization;
-
-public class ContactFormModel
-{
-    [Required]
-    public string Name { get; set; }
-
-    [Required, EmailAddress]
-    public string Email { get; set; }
-
-    [Required]
-    public string Message { get; set; }
-}
+using Microsoft.EntityFrameworkCore;
+using EventManagerASP;
 
 public class HomeController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ILogger<HomeController> _logger;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
-    public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<HomeController> logger)
+    public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IStringLocalizer<SharedResource> localizer)
     {
         _context = context;
         _userManager = userManager;
-        _logger = logger;
-    }
-
-    public IActionResult Contact()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public IActionResult Contact(ContactFormModel model)
-    {
-        if (ModelState.IsValid)
-        {
-            TempData["SuccessMessage"] = "Bedankt voor je bericht! We nemen snel contact met je op.";
-            return RedirectToAction("Contact");
-        }
-
-        return View(model);
+        _localizer = localizer;
     }
 
     public async Task<IActionResult> Index()
     {
         var userId = _userManager.GetUserId(User);
 
-        IEnumerable<Event> events;
-
-        if (string.IsNullOrEmpty(userId))
-        {
-            events = await _context.Events.Include(e => e.Category).ToListAsync();
-        }
-        else
-        {
-            events = await _context.Events
-                .Include(e => e.Category)
+        var events = userId == null
+            ? await _context.Events.Include(e => e.Category).ToListAsync()
+            : await _context.Events
                 .Where(e => _context.Organisators.Any(o => o.EventId == e.Id && o.UserId == userId))
+                .Include(e => e.Category)
                 .ToListAsync();
-        }
 
+        ViewData["Title"] = _localizer["Home"];
         return View(events);
+    }
+
+    public IActionResult Contact()
+    {
+        ViewData["Title"] = _localizer["Contact"];
+        return View();
     }
 
     public IActionResult SetLanguage(string culture, string returnUrl)

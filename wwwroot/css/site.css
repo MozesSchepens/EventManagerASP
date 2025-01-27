@@ -1,5 +1,5 @@
 body {
-    background-color: bord;
+    background-color: darkred;
     color: #fff;
     font-family: Arial, sans-serif;
 }
@@ -44,16 +44,6 @@ body {
         text-decoration: underline;
     }
 
-.btn-custom {
-    background-color: #FFC107;
-    color: #000;
-    font-weight: bold;
-    border-radius: 5px;
-}
-
-    .btn-custom:hover {
-        background-color: #E0A800;
-    }
 
 input#searchBox {
     width: 100%;
@@ -61,7 +51,8 @@ input#searchBox {
     margin-bottom: 10px;
 }
 .container {
-    max-width: 600px;
+    max-width: 90%;
+    width: 100%;
     background-color: #5A002C;
     padding: 20px;
     border-radius: 8px;
@@ -76,15 +67,6 @@ h2.text-warning {
     color: #ffd700;
 }
 
-.btn-primary {
-    background-color: #ffd700;
-    border: none;
-    color: #000;
-}
-
-    .btn-primary:hover {
-        background-color: #e6c300;
-    }
 .navbar .dropdown-menu {
     background-color: #3a1f1f;
     border-radius: 8px;
@@ -110,3 +92,24 @@ h2.text-warning {
 p {
     color: #ffc107;
 }
+.btn-warning {
+    background-color: #ffc107; /* Oker */
+    color: black; /* Zwarte tekst voor contrast */
+    border: none;
+}
+
+    .btn-warning:hover {
+        background-color: #e0a800; 
+        color: black;
+    }
+
+.btn-danger {
+    background-color: #dc3545; 
+    color: white;
+    border: none;
+}
+
+    .btn-danger:hover {
+        background-color: #c82333; 
+        color: white;
+    }

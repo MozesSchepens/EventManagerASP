@@ -126,9 +126,6 @@
   <data name="Edit" xml:space="preserve">
     <value>Editer</value>
   </data>
-  <data name="Project" xml:space="preserve">
-    <value>Projet</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>Sauvegarder</value>
   </data>

@@ -126,14 +126,8 @@
   <data name="Index" xml:space="preserve">
     <value>Index</value>
   </data>
-  <data name="Parameters" xml:space="preserve">
-    <value>Paramètres</value>
-  </data>
   <data name="Privacy" xml:space="preserve">
     <value>Privacy</value>
-  </data>
-  <data name="Projects" xml:space="preserve">
-    <value>Projets</value>
   </data>
   <data name="Users" xml:space="preserve">
     <value>Utilisateurs</value>
