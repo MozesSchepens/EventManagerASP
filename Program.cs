@@ -110,23 +110,16 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        context.Database.Migrate();
-
-        if (!context.Users.Any() || !context.Roles.Any())
-        {
-            logger.LogInformation(" Geen gebruikers of rollen gevonden, seeding uitvoeren...");
-            SeedDataContext.Initialize(context, userManager, roleManager, logger).Wait();
-        }
-        else
-        {
-            logger.LogInformation(" Database bevat al gebruikers en rollen, geen seeding nodig.");
-        }
+        context.Database.Migrate(); 
+        await SeedDataContext.Initialize(context, userManager, roleManager, logger);
+        logger.LogInformation("✅ Database migratie voltooid en seeding succesvol.");
     }
     catch (Exception ex)
     {
-        logger.LogError($" Database seeding mislukt: {ex.Message}\n{ex.StackTrace}");
+        logger.LogError($"❌ Database seeding mislukt: {ex.Message}\n{ex.StackTrace}");
     }
 }
+
 
 // **MIDDLEWARE INLADEN**
 app.UseStaticFiles();
@@ -152,5 +145,4 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
-
 app.Run();

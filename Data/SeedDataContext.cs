@@ -16,13 +16,36 @@ namespace EventManagerASP.Data
             await context.Database.MigrateAsync();
 
             string[] roles = { "Admin", "User" };
-
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
                     await roleManager.CreateAsync(new IdentityRole(role));
                     logger.LogInformation($"✅ Rol '{role}' aangemaakt.");
+                }
+            }
+
+            if (!context.Users.Any())
+            {
+                var adminUser = new ApplicationUser { UserName = "admin@event.com", Email = "admin@event.com", EmailConfirmed = true };
+                var normalUser = new ApplicationUser { UserName = "user@event.com", Email = "user@event.com", EmailConfirmed = true };
+
+                string adminPassword = "Admin@123";
+                string userPassword = "User@123";
+
+                var adminResult = await userManager.CreateAsync(adminUser, adminPassword);
+                var userResult = await userManager.CreateAsync(normalUser, userPassword);
+
+                if (adminResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    logger.LogInformation("✅ Admin-gebruiker aangemaakt en toegewezen aan rol 'Admin'.");
+                }
+
+                if (userResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(normalUser, "User");
+                    logger.LogInformation("✅ Normale gebruiker aangemaakt en toegewezen aan rol 'User'.");
                 }
             }
 
@@ -43,16 +66,17 @@ namespace EventManagerASP.Data
 
             if (!context.Events.Any())
             {
-                var feestCategory = await context.Categories.Where(c => c.Name == "Feest").Select(c => c.Id).FirstOrDefaultAsync();
-                var etenCategory = await context.Categories.Where(c => c.Name == "Eten").Select(c => c.Id).FirstOrDefaultAsync();
-                var kerstCategory = await context.Categories.Where(c => c.Name == "Kerst").Select(c => c.Id).FirstOrDefaultAsync();
-                var festivalCategory = await context.Categories.Where(c => c.Name == "Festival").Select(c => c.Id).FirstOrDefaultAsync();
+                var categories = await context.Categories.ToListAsync();
+                var feestCategory = categories.FirstOrDefault(c => c.Name == "Feest")?.Id;
+                var etenCategory = categories.FirstOrDefault(c => c.Name == "Eten")?.Id;
+                var kerstCategory = categories.FirstOrDefault(c => c.Name == "Kerst")?.Id;
+                var festivalCategory = categories.FirstOrDefault(c => c.Name == "Festival")?.Id;
 
                 List<Event> events = new List<Event>
                 {
-                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = etenCategory },
-                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = kerstCategory },
-                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = festivalCategory }
+                    new Event { Name = "BBQ Party", Description = "Heerlijke BBQ met vrienden", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = (int)etenCategory },
+                    new Event { Name = "Kerstfeest", Description = "Gezellige kerstviering", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = (int)kerstCategory },
+                    new Event { Name = "Zomerfestival", Description = "Groot festival met live muziek", StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1), CategoryId = (int)festivalCategory }
                 };
 
                 context.Events.AddRange(events);
